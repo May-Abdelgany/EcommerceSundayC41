@@ -6,6 +6,8 @@ import couponModel from "../../../../DB/model/Coupon.model.js";
 import { asyncHandler } from "../../../utils/errorHandling.js";
 import createInvoice from "../../../utils/createInvoice.js";
 import sendEmail from "../../../utils/email.js";
+import payment from "../../../utils/payment.js";
+import Stripe from "stripe";
 //1-cart ,select products
 //2-loop for allProducts 
 export const createOrder =
@@ -63,6 +65,9 @@ export const createOrder =
         req.body.products = allProducts
         req.body.subPrice = subPrice
         req.body.finalPrice = subPrice - (subPrice * coupon?.amount || 0) / 100
+        if (req.body.paymentTypes == 'card') {
+            req.body.status = 'waitForPayment'
+        }
         const order = await orderModel.create(req.body)
         if (couponName) {
             await couponModel.updateOne({ _id: coupon._id }, { $push: { usedBy: _id } })
@@ -94,7 +99,43 @@ export const createOrder =
                 }
             ]
         })
-        return res.json({ message: "done", order })
+
+        //if paymentType card
+        if (order.paymentTypes == 'card') {
+            const stripe = new Stripe(process.env.SECRET_KEY);
+            let createCoupon
+            if (couponName) {
+                createCoupon = await stripe.coupons.create({
+                    percent_off: coupon.amount,
+                    duration: 'once'
+                })
+                console.log(createCoupon);
+            }
+            const session = await payment({
+                customer_email: req.user.email,
+                metadata: {
+                    orderId: order._id
+                },
+                success_url: `${process.env.SUCCESS_URL}/${order._id}`,
+                cancel_url: `${process.env.CANCEL_URL}/${order._id}`,
+                line_items: order.products.map(element => {
+                    return {
+                        price_data: {
+                            currency: 'usd',
+                            product_data: {
+                                name: element.name
+                            },
+                            unit_amount: element.unitPrice * 100,
+
+                        },
+                        quantity: element.quantity
+                    }
+                }),
+                discounts: couponName ? [{ coupon: createCoupon.id }] : []
+            })
+            return res.status(201).json({ message: "done", order, session })
+        }
+        return res.status(201).json({ message: "done", order })
     }
 
 
