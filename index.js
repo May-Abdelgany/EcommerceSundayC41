@@ -8,7 +8,7 @@ const app = express()
 // setup port and the baseUrl
 //app.use(cors())
 
-var whitelist = ['http://example1.com', 'http://example2.com']
+// var whitelist = ['http://example1.com', 'http://example2.com']
 // var corsOptions = {
 //   origin: function (origin, callback) {
 //     if (whitelist.indexOf(origin) !== -1) {
