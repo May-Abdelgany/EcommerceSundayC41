@@ -7,7 +7,7 @@ export const tokenSchema = joi.object({
 export const createOrderSchema = joi.object({
     address: joi.string().min(20).max(100).required(),
     phone: joi.array().items(joi.string().required()).required(),
-    paymentType: joi.string().valid('card', 'cash'),
+    paymentTypes: joi.string().valid('card', 'cash'),
     note: joi.string().min(20),
     couponName: joi.string().max(20).min(3).trim(),
     products: joi.array().items(joi.object({

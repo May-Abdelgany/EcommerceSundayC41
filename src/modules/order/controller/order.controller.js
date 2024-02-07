@@ -4,9 +4,11 @@ import productModel from "../../../../DB/model/Product.model.js";
 import couponModel from "../../../../DB/model/Coupon.model.js";
 
 import { asyncHandler } from "../../../utils/errorHandling.js";
+import createInvoice from "../../../utils/createInvoice.js";
+import sendEmail from "../../../utils/email.js";
 //1-cart ,select products
 //2-loop for allProducts 
-export const createOrder = asyncHandler(
+export const createOrder =
     async (req, res, next) => {
         let { products, couponName } = req.body
         const { _id } = req.user
@@ -60,14 +62,41 @@ export const createOrder = asyncHandler(
         }
         req.body.products = allProducts
         req.body.subPrice = subPrice
-        req.body.finalPrice = subPrice - (subPrice * coupon.amount || 0) / 100
+        req.body.finalPrice = subPrice - (subPrice * coupon?.amount || 0) / 100
         const order = await orderModel.create(req.body)
         if (couponName) {
             await couponModel.updateOne({ _id: coupon._id }, { $push: { usedBy: _id } })
         }
+
+        //create invoice
+        const invoice = {
+            shipping: {
+                name: req.user.userName,
+                address: order.address,
+                city: "San Francisco",
+                state: "CA",
+                country: "US",
+                postal_code: 94111
+            },
+            items: order.products,
+            subtotal: subPrice,
+            paid: 0,
+            invoice_nr: order._id.toString(),
+            createdAt: order.createdAt
+        };
+        createInvoice(invoice, "invoice.pdf");
+
+        await sendEmail({
+            to: req.user.email, subject: 'invoice', attachments: [
+                {
+                    path: 'invoice.pdf',
+                    application: 'application/pdf'
+                }
+            ]
+        })
         return res.json({ message: "done", order })
     }
-)
+
 
 
 export const cancelOrder = asyncHandler(

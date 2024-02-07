@@ -4,6 +4,7 @@ dotenv.config({ path: path.resolve('./config/.env') })
 import express from 'express'
 import initApp from './src/index.router.js'
 import cors from 'cors'
+// import createInvoice from './src/utils/createInvoice.js'
 const app = express()
 // setup port and the baseUrl
 //app.use(cors())
@@ -43,6 +44,37 @@ const app = express()
 
 
 app.use(cors())
+
+
+// const invoice = {
+//     shipping: {
+//       name: "John Doe",
+//       address: "1234 Main Street",
+//       city: "San Francisco",
+//       state: "CA",
+//       country: "US",
+//       postal_code: 94111
+//     },
+//     items: [
+//       {
+//         item: "TC 100",
+//         description: "Toner Cartridge",
+//         quantity: 2,
+//         amount: 6000
+//       },
+//       {
+//         item: "USB_EXT",
+//         description: "USB Cable Extender",
+//         quantity: 1,
+//         amount: 2000
+//       }
+//     ],
+//     subtotal: 8000,
+//     paid: 0,
+//     invoice_nr: 1234
+//   };
+  
+//   createInvoice(invoice, "invoice.pdf");
 
 
 const port = process.env.PORT || 5000
