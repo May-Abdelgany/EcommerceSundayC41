@@ -101,7 +101,7 @@ export const createOrder =
         })
 
         //if paymentType card
-        if (order.paymentTypes == 'card') {
+        if (order.paymentType == 'card') {
             const stripe = new Stripe(process.env.SECRET_KEY);
             let createCoupon
             if (couponName) {
@@ -112,6 +112,7 @@ export const createOrder =
                 console.log(createCoupon);
             }
             const session = await payment({
+                payment_method_types:['card'],
                 customer_email: req.user.email,
                 metadata: {
                     orderId: order._id
