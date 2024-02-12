@@ -49,7 +49,7 @@ const orderSchema = new Schema({
         type: [String],
         required: true
     },
-    paymentType: {
+    paymentTypes: {
         type: String,
         enum: ['card', 'cash'],
         default: 'cash'

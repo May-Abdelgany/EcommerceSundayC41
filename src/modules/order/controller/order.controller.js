@@ -101,7 +101,7 @@ export const createOrder =
         })
 
         //if paymentType card
-        if (order.paymentType == 'card') {
+        if (order.paymentTypes == 'card') {
             const stripe = new Stripe(process.env.SECRET_KEY);
             let createCoupon
             if (couponName) {
