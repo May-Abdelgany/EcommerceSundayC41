@@ -109,7 +109,6 @@ export const createOrder =
                     percent_off: coupon.amount,
                     duration: 'once'
                 })
-                console.log(createCoupon);
             }
             const session = await payment({
                 payment_method_types:['card'],
@@ -134,7 +133,8 @@ export const createOrder =
                 }),
                 discounts: couponName ? [{ coupon: createCoupon.id }] : []
             })
-            return res.status(201).json({ message: "done", order, session })
+            
+            return res.status(200).json({ message: "done", order, session })
         }
         return res.status(201).json({ message: "done", order })
     }
