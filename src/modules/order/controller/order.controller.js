@@ -194,7 +194,7 @@ export const deliverdOrder = asyncHandler(async (req, res, next) => {
   return res.json({ message: "done", updateOrder });
 });
 
-export const webhook = asyncHandler(async (req, res, next) => {
+export const webhook = async (req, res, next) => {
   const stripe = new Stripe(process.env.SECRET_KEY);
   const sig = req.headers["stripe-signature"];
   let event;
@@ -219,4 +219,4 @@ export const webhook = asyncHandler(async (req, res, next) => {
     { status: "placed" }
   );
   return res.json({ message: "done" });
-});
+};
