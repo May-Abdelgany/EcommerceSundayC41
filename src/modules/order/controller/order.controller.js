@@ -196,7 +196,7 @@ export const deliverdOrder = asyncHandler(async (req, res, next) => {
 
 export const webhook = asyncHandler(async (req, res, next) => {
   const stripe = new Stripe(process.env.SECRET_KEY);
-  const sig = req.headers['stripe-signature'];
+  const sig = req.headers["stripe-signature"];
   let event;
 
   try {
@@ -211,13 +211,13 @@ export const webhook = asyncHandler(async (req, res, next) => {
   }
 
   // Handle the event
-  if (event.type != "checkout.session.completed") {
-    return next(new Error("invalid payment", { cause: 400 }));
+  if (event.type == "checkout.session.completed") {
+    const { orderId } = event.data.object.metadata;
+    const updateOrder = await orderModel.updateOne(
+      { _id: orderId },
+      { status: "placed" }
+    );
+    return res.json({ message: "done" });
   }
-  const { orderId } = event.data.object.metadata;
-  const updateOrder = await orderModel.updateOne(
-    { _id: orderId },
-    { status: "placed" }
-  );
-  return res.json({ message: "done" });
+  return next(new Error("invalid payment", { cause: 400 }));
 });
