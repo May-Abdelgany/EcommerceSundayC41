@@ -196,7 +196,7 @@ export const deliverdOrder = asyncHandler(async (req, res, next) => {
 
 export const webhook = asyncHandler(async (req, res, next) => {
   const stripe = new Stripe(process.env.SECRET_KEY);
-  const sig = req.headers[process.env.SECRET_KEY];
+  const sig = req.headers['stripe-signature'];
   let event;
 
   try {
