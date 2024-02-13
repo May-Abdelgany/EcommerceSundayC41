@@ -194,7 +194,7 @@ export const deliverdOrder = asyncHandler(async (req, res, next) => {
   return res.json({ message: "done", updateOrder });
 });
 
-export const webhook = asyncHandler(async(req, res, next) => {
+export const webhook = asyncHandler(async (req, res, next) => {
   const stripe = new Stripe(process.env.SECRET_KEY);
   const sig = req.headers[process.env.SECRET_KEY];
   let event;
@@ -214,9 +214,10 @@ export const webhook = asyncHandler(async(req, res, next) => {
   if (event.type != "checkout.session.completed") {
     return next(new Error("invalid payment", { cause: 400 }));
   }
+  const { orderId } = event.data.object.metadata;
   const updateOrder = await orderModel.updateOne(
-    { _id: event.data.object.metadata.orderId },
-    { status: "placed"}
+    { _id: orderId },
+    { status: "placed" }
   );
-  return res.json({ message: "done", updateOrder });
+  return res.json({ message: "done" });
 });
