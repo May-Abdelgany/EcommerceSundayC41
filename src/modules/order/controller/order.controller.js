@@ -126,7 +126,7 @@ export const createOrder = async (req, res, next) => {
       payment_method_types: ["card"],
       customer_email: req.user.email,
       metadata: {
-        orderId: order._id,
+        orderId: order._id.toString(),
       },
       success_url: `${process.env.SUCCESS_URL}/${order._id}`,
       cancel_url: `${process.env.CANCEL_URL}/${order._id}`,
