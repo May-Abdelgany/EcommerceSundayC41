@@ -194,31 +194,25 @@ export const deliverdOrder = asyncHandler(async (req, res, next) => {
   return res.json({ message: "done", updateOrder });
 });
 
-export const webhooks = async (req, res, next) => {
-  const stripe = new Stripe(process.env.SECRET_KEY);
-  const sig = req.headers["stripe-signature"];
+export const webhook = asyncHandler(
+    async (req, res, next) => {
+        const sig = req.headers['stripe-signature'];
+        const stripe = new Stripe(process.env.SECRET_KEY)
 
-  let event;
+        let event;
 
-  try {
-    event = stripe.webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.END_POINT_SECRET
-    );
-  } catch (err) {
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-  const { orderId } = event.data.object.metadata;
-  // Handle the event
-  if (event.type == "checkout.session.completed") {
-    await orderModel.findOneAndUpdate(
-      { _id: orderId },
-      {
-        status: "placed",
-      }
-    );
-    return res.status(200).json({ message: "Done" });
-  }
-  return res.status(400).json({ message: "please try to pay again" });
-};
+        try {
+            event = stripe.webhooks.constructEvent(req.body, sig, process.env.END_POINT_SECRET);
+        } catch (err) {
+            res.status(400).send(`Webhook Error: ${err.message}`);
+            return;
+        }
+
+        // Handle the event
+        if (event.type != 'checkout.session.completed') {
+            return next(new Error('failer to payment', { cause: 500 }))
+        }
+        await orderModel.updateOne({ _id: event.data.object.metadata }, { status: 'placed' })
+        return res.status(200).json({ message: 'done' })
+    }
+)
