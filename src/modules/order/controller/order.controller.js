@@ -206,18 +206,17 @@ export const webhook = asyncHandler(async (req, res, next) => {
       process.env.END_POINT_SECRET
     );
   } catch (err) {
-    res.status(400).send(`Webhook Error: ${err.message}`);
-    return;
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
-
+  console.log("Aaaaaaaaaaaaaaaaaaaaaaa");
   // Handle the event
-  if (event.type == "checkout.session.completed") {
-    const { orderId } = event.data.object.metadata;
-    const updateOrder = await orderModel.updateOne(
-      { _id: orderId },
-      { status: "placed" }
-    );
-    return res.json({ message: "done" });
+  if (event.type != "checkout.session.completed") {
+    return next(new Error("invalid payment", { cause: 400 }));
   }
-  return next(new Error("invalid payment", { cause: 400 }));
+  const { orderId } = event.data.object.metadata;
+  const updateOrder = await orderModel.updateOne(
+    { _id: orderId },
+    { status: "placed" }
+  );
+  return res.json({ message: "done" });
 });
