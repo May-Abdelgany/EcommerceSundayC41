@@ -212,7 +212,7 @@ export const webhook = asyncHandler(
         if (event.type != 'checkout.session.completed') {
             return next(new Error('failer to payment', { cause: 500 }))
         }
-        await orderModel.updateOne({ _id: event.data.object.metadata }, { status: 'placed' })
+        await orderModel.updateOne({ _id: event.data.object.metadata.orderId }, { status: 'placed' })
         return res.status(200).json({ message: 'done' })
     }
 )
