@@ -38,6 +38,6 @@ router.patch(
   orderController.deliverdOrder
 );
 
-router.post("/webhook", express.raw({ type: "application/json" }),orderController.webhook);
+router.post("/webhook", express.raw({ type: "application/json" }),orderController.webhooks);
 
 export default router;

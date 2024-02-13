@@ -194,9 +194,10 @@ export const deliverdOrder = asyncHandler(async (req, res, next) => {
   return res.json({ message: "done", updateOrder });
 });
 
-export const webhook = async (req, res, next) => {
+export const webhooks = async (req, res, next) => {
   const stripe = new Stripe(process.env.SECRET_KEY);
   const sig = req.headers["stripe-signature"];
+
   let event;
 
   try {
@@ -208,15 +209,16 @@ export const webhook = async (req, res, next) => {
   } catch (err) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
-  console.log("Aaaaaaaaaaaaaaaaaaaaaaa");
-  // Handle the event
-  if (event.type != "checkout.session.completed") {
-    return next(new Error("invalid payment", { cause: 400 }));
-  }
   const { orderId } = event.data.object.metadata;
-  const updateOrder = await orderModel.updateOne(
-    { _id: orderId },
-    { status: "placed" }
-  );
-  return res.json({ message: "done" });
+  // Handle the event
+  if (event.type == "checkout.session.completed") {
+    await orderModel.findOneAndUpdate(
+      { _id: orderId },
+      {
+        status: "placed",
+      }
+    );
+    return res.status(200).json({ message: "Done" });
+  }
+  return res.status(400).json({ message: "please try to pay again" });
 };
