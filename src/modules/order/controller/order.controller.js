@@ -99,18 +99,18 @@ export const createOrder = async (req, res, next) => {
     invoice_nr: order._id.toString(),
     createdAt: order.createdAt,
   };
-  createInvoice(invoice, "invoice.pdf");
+  // createInvoice(invoice, "invoice.pdf");
 
-  await sendEmail({
-    to: req.user.email,
-    subject: "invoice",
-    attachments: [
-      {
-        path: "invoice.pdf",
-        application: "application/pdf",
-      },
-    ],
-  });
+  // await sendEmail({
+  //   to: req.user.email,
+  //   subject: "invoice",
+  //   attachments: [
+  //     {
+  //       path: "invoice.pdf",
+  //       application: "application/pdf",
+  //     },
+  //   ],
+  // });
 
   //if paymentType card
   if (order.paymentTypes == "card") {
@@ -219,6 +219,7 @@ export const webhook = asyncHandler(async (req, res, next) => {
       { _id: event.data.object.orderId },
       { status: "placed" }
     );
+    return res.status(200).json({ message: "done" });
   } else {
     return next(new Error("failed to payment please try again"));
   }
